@@ -1,6 +1,6 @@
 ----
--layout: post
--title: Chicago Open Rideshare Dataset: Getting Started
+layout: post
+title: Chicago Open Rideshare Dataset: Getting Started
 ----
 
 
@@ -8,7 +8,7 @@
 I was recently reading Steve Vance and John Greenfield's [article](https://chi.streetsblog.org/2019/04/18/the-most-common-chicago-ride-hailing-trip-is-a-1-mile-hop-from-river-north-to-loop/) summarizing data from the City of Chicago's recent opening of anonymized [ride hailing data](https://data.cityofchicago.org/Transportation/Transportation-Network-Providers-Trips/m6dm-c72p). I figured I would play around with the data, to at least learn something new myself, and at most find something interesting in the dataset. I also wanted to share with others how I went about the technical aspects of my analyses. So here we go...
 
 # The plan
-I did some research, and found that [PostGIS](https://postgis.net) is a very popular, open-source Postgres extension for dealing with GIS data. [Postgres](https://www.postgresql.org/) is a successful relational SQL database. Postgres could help us answer questions like "Which census tract paid the most in tips?". But with the PostGIS extension, we can answer more geographically-sophisticated questions such as . I also want to use [Leaflet](https://leafletjs.com/), a JavaScript library that is used for map visualizations, in order to visualize some of our findings.
+I did some research, and found that [PostGIS](https://postgis.net) is a very popular, open-source Postgres extension for dealing with GIS data. [Postgres](https://www.postgresql.org/) is a successful relational SQL database. Postgres could help us answer questions like "Which census tract paid the most in tips?". I also want to use [Leaflet](https://leafletjs.com/), a JavaScript library that is used for map visualizations, in order to visualize some of our findings.
 
 So, the plan looks something like this:
 - Set up Postgres database with PostGIS extension
@@ -18,8 +18,10 @@ So, the plan looks something like this:
 
 If this means nothing to you, then great! I'll provide plently of detail. If it's too much detail, don't worry, hopefully I'll have more interesting findings in future posts.
 
+This post should hopefully be comprehensible by people with minimal computer experience.
+
 # Lets do it
-It will probably be easiest if you use the exact same setup as me, so I think it's best that you get a "droplet" set up on [Digital Ocean](https://www.digitalocean.com/products/droplets/). A droplet is just a virtual machine that you can get in the "cloud". Oooooh. Heard of the cloud before? It's a beautiful, fluffy place. Once you create an account, you will be able to get a server with lots of resources (don't worry, we'll use one with very few resources) in a matter of seconds. I like Digital Ocean for its simple interface and simple pricing. With AWS I often struggle to understand how much I'll be paying per month. Using a server will be nice to make sure we don't ruin our own personal machines, and also to have enough hard disk space (the dataset is big). Also, the $5 monthly fee is pro-rated, so if you finish this demo in a few hours, you'll be paying pennies.
+It will probably be easiest if you use the exact same setup as me, so I think it's best that you get a "droplet" set up on [Digital Ocean](https://www.digitalocean.com/products/droplets/). A droplet is just a virtual machine (basically a server) that you can get in the "cloud". Oooooh. Heard of the cloud before? It's a beautiful, fluffy place. Once you create an account, you will be able to get a server with lots of resources (don't worry, we'll use one with very few resources) in a matter of seconds. I like Digital Ocean for its simple interface and simple pricing. With [AWS](https://aws.amazon.com) I often struggle to understand how much I'll be paying. Using a server will be nice to make sure we don't ruin our own personal machines, and also to have enough hard disk space (the dataset is big). Also, the $5 monthly fee is pro-rated, so if you finish this demo in a few hours, you'll be paying pennies.
 
 Once you create your account, you'll want to create a new droplet by clicking on
 "Create" in the top right of the dashboard:
@@ -30,6 +32,71 @@ Then choose Ubuntu 16.0.4, Standard plan. These should be the default.
 
 ![droplet-1](/public/droplet-1.png)
 
+Be sure to get the cheapest droplet, at $5 a month
+
+![5-dollar](/public/5-dollar.png)
+
+Now, for the important part. Add a new ssh key,
+
+![new-ssh](/public/new-ssh.png)
+
+Now, we need to generate an ssh key on our local machine. Ssh stands for "secure shell", and is a secure way to remotely access a server. We need to generate the a secure key that we'll give to Digital Ocean, so that when we try to login to our server, Digital Ocean will know that we're authorized to access the machine. To generate an ssh key, open up your Terminal application (I'm on OS X, but if you're on Windows, open up [Git bash](https://git-scm.com/downloads) instead of the normal Windows command prompt). Type `ssh-keygen`, and hit enter to use all the defaults. Next, type `vim ~/.ssh/id_rsa.pub`. You should see a bunch of letters that mean nothing to you. Go ahead and copy this entire string into Digital Ocean.
+
+![add-ssh](/public/add-ssh.png)
+
+Now, create the droplet and head back to the Digital Ocean dashboard. You should see your droplet and its IP address in the Dashboard.
+
+![dashboard-ip](/public/dashboard-ip.png)
+
+Now in your Terminal, run `ssh root@<IP ADDRESS HERE>`. So I'll run `ssh root@206.189.194.182`. 
+
+You should be logged on to the server now. Let's download the Postgres database now. Type `vim /etc/apt/sources.list.d/pgdg.list`. `vim` is a Terminal-based text editor. When you open it, you start out in "normal" mode. In normal mode, you can't type anything. So hit `i` to enter insert mode, and type `deb http://apt.postgresql.org/pub/repos/apt/ xenial-pgdg main`. Then hit the escape key, and type `:wq` and then Enter to exit `vim` and save the changes to the file. By adding this to the file, we're enabling the program `apt` to download Postgres for us from this repository. `apt` comes with certain Linux distributions, and is a really handy way to download programs. Also, run `sudo wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -` to enable us to install Postgres. Then, simply  run `sudo apt-get update` in order to pull in this new repository. Then, run `sudo apt-get install postgis`. Then, run `sudo su - postgres` to change the user you're currently running as from `root` to the user named `postgres`, which should have been automatically created when you install PostGIS and Postgres. Then, run `psql`.
+
+If this all worked, you should now be logged in to a Postgres database instance. It should look like the below picture. If so, congrats! We're almost ready to make really cool maps and stuffs. 
+
+![postgres-initial](/public/postgres-initial.png)
+
+When you log in to the Postgres database, you're initially put in a default database called "postgres". Let's make our own to make everything clean:
+
+`create database rideshare;`
+
+Then, let's change to this database:
+
+`\c rideshare`
+
+You should see `psql` say something like `You are now connected to database "rideshare" as user "postgres".`.
+
+
+Now, let's create a user that can login to the database:
+
+`create user rideshare with password 'rideshare';`
+
+Then, since we don't really care about security, let's make this user with a very easily-guessable password the owner of our new rideshare database:
+
+`alter database rideshare owner to rideshare;`
+
+Now, if we login as user "rideshare", with password "rideshare", we can do anything in the "rideshare" database. Now, let's install PostGIS to let us store and query geographic data:
+
+`CREATE EXTENSION postgis;
+CREATE EXTENSION postgis_topology;`
+
+Now, let's create a table to store all the trip data. I'll call it "trip". A table is more or less an Excel sheet but in database world. Wow this is getting exciting.
+
+`create table trip (trip_id char(40) unique, trip_start_timestamp timestamp not null, trip_end_timestamp timestamp not null, trip_seconds int not null, trip_miles numeric(8, 1) not null, pickup_census_tract bigint null, dropoff_census_tract bigint null, fare numeric(8, 2) not null, tip smallint not null, additional_charges numeric(8, 2), shared_trip_authorized boolean not null, trips_pooled smallint not null, pickup_centroid_location geometry(POINT, 4326), dropoff_centroid_location geometry(POINT, 4326));`
+
+These columns align 1-to-1 with the columns in the [dataset](https://data.cityofchicago.org/Transportation/Transportation-Network-Providers-Trips/m6dm-c72p/data). Now, we need to download the data from the City of Chicago website, and get it into this darned database.
+
+We'll need to do some small tranformations on the data downloaded from the City in order to import it. Python is a great scripting language perfect for this task.
+
+Let's exit out of `psql` by running `\q`. We should now be back in our normal ssh terminal. Let's type `exit` again, so that instead of being logged in as the `postgres` user, we're logged in as `root`. You should see something like the below:
+
+![root](/public/root.png)
+
+`apt-get install python-dev` will install Python for us. Also run `apt install virtualenv`. `virtualenv` is a Python tool that helps us manage packages. We don't want to write the code to insert data into Postgres ourselves, so we'll install a package to do it for us. That package is called pyscopg2. First, create a Python virtual environment called `rideshare_env`. Run `virtualenv rideshare_env` to do so. Then, run `source rideshare_env/bin/activate` to "activate" the virtual environment, and install pyscopg2 by running `pip install psycopg2-binary`.
+
+Ok folks, I can tell the anticipation is building. It's time to import 17 MILLION rows of data into our database. 
+
+Run `wget -O tripdata.csv https://data.cityofchicago.org/api/views/m6dm-c72p/rows.csv?accessType=DOWNLOAD` to download the dataset into a csv. This might take a while...
 
 Ubuntu 16.0.4...
 
