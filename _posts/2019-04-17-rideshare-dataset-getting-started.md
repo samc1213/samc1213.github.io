@@ -1,10 +1,28 @@
+----
+-layout: post
+-title: Chicago Open Rideshare Dataset: Getting Started
+----
 # Introduction
 I was recently reading Steve Vance and John Greenfield's [article](https://chi.streetsblog.org/2019/04/18/the-most-common-chicago-ride-hailing-trip-is-a-1-mile-hop-from-river-north-to-loop/) summarizing data from the City of Chicago's recent opening of anonymized [ride hailing data](https://data.cityofchicago.org/Transportation/Transportation-Network-Providers-Trips/m6dm-c72p). I figured I would play around with the data, to at least learn something new myself, and at most find something interesting in the dataset. I also wanted to share with others how I went about the technical aspects of my analyses. So here we go...
 
 # The plan
-I did some research, and found that [PostGIS](https://postgis.net) is a very popular, open-source Postgres extension for dealing with GIS data. [Postgres](https://www.postgresql.org/) is a successful relational SQL database. Postgres could help us answer questions like "Which census tract paid the most in tips?". But with the PostGIS extension, we can answer more geographically-sophisticated questions like "Does the size of the tip depend on the distance traveled on the trip?". I also have heard of [Leaflet](https://leafletjs.com/), a JavaScript library that is used for map visualizations, that I might be able to use to visualize answers to some of these questions.
+I did some research, and found that [PostGIS](https://postgis.net) is a very popular, open-source Postgres extension for dealing with GIS data. [Postgres](https://www.postgresql.org/) is a successful relational SQL database. Postgres could help us answer questions like "Which census tract paid the most in tips?". But with the PostGIS extension, we can answer more geographically-sophisticated questions such as . I also want to use [Leaflet](https://leafletjs.com/), a JavaScript library that is used for map visualizations, in order to visualize some of our findings.
 
 So, the plan looks something like this:
+- Set up Postgres database with PostGIS extension
+- Import all 17 million trips into the database
+- Query the dataset for some interesting finding
+- Map the finding using Leaflet, so we can see our results in a pretty webpage
+
+If this means nothing to you, then great! I'll provide plently of detail. If it's too much detail, don't worry, hopefully I'll have more interesting findings in future posts.
+
+# Lets do it
+It will probably be easiest if you use the exact same setup as me, so I think it's best that you get a "droplet" set up on [Digital Ocean](https://www.digitalocean.com/products/droplets/). A droplet is just a virtual machine that you can get in the "cloud". Oooooh. Heard of the cloud before? It's a beautiful, fluffy place. Once you create an account, you will be able to get a server with lots of resources (don't worry, we'll use one with very few resources) in a matter of seconds. I like Digital Ocean for its simple interface and simple pricing. With AWS I often struggle to understand how much I'll be paying per month. Using a server will be nice to make sure we don't ruin our own personal machines, and also to have enough hard disk space (the dataset is big). Also, the $5 monthly fee is pro-rated, so if you finish this demo in a few hours, you'll be paying pennies.
+
+Once you create your account, you'll want to create a new droplet by clicking on
+"Create" in the top right of the dashboard:
+
+![create-button](/public/create-button.png){:class="img-responsive"}
 
 Ubuntu 16.0.4...
 
