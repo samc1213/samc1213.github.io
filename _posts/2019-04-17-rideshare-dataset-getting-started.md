@@ -4,10 +4,10 @@ title: Chicago Open Rideshare Dataset - Getting Started
 ---
 
 # Introduction
-I was recently reading Steve Vance and John Greenfield's [article](https://chi.streetsblog.org/2019/04/18/the-most-common-chicago-ride-hailing-trip-is-a-1-mile-hop-from-river-north-to-loop/){:target="_blank"} summarizing data from the City of Chicago's recent opening of anonymized [ride hailing data](https://data.cityofchicago.org/Transportation/Transportation-Network-Providers-Trips/m6dm-c72p){:target="_blank"}. I figured I would play around with the data, to at least learn something new myself, and at most find something interesting in the dataset. I also wanted to share with others how I went about the technical aspects of my analyses. So here we go...
+I was recently reading Steve Vance and John Greenfield's [article](https://chi.streetsblog.org/2019/04/18/the-most-common-chicago-ride-hailing-trip-is-a-1-mile-hop-from-river-north-to-loop/){:target="_blank"} summarizing data from the City of Chicago's publishing of anonymized [ride hailing data](https://data.cityofchicago.org/Transportation/Transportation-Network-Providers-Trips/m6dm-c72p){:target="_blank"}. I figured I would play around with the data, to at least learn some new skills, and at most find something interesting in the dataset. I also wanted to share with others how I went about the technical aspects of my analyses. So here we go...
 
 # The plan
-I did some research, and found that [PostGIS](https://postgis.net){:target="_blank"} is a very popular, open-source Postgres extension for dealing with GIS data. [Postgres](https://www.postgresql.org/){:target="_blank"} is a successful relational SQL database. Postgres could help us answer questions like "Which census tract paid the most in tips?". I also want to use [Leaflet](https://leafletjs.com/){:target="_blank"}, a JavaScript library that is used for map visualizations, in order to visualize some of our findings.
+I did some research, and found that [PostGIS](https://postgis.net){:target="_blank"} is a very popular, open-source Postgres extension for dealing with GIS data. [Postgres](https://www.postgresql.org/){:target="_blank"} is a relational SQL database, but doesn't have any GIS capabilities out of the box. I've used Postgres before. Postgres could help us answer questions like "Which census tract paid the most in tips?". I also want to use [Leaflet](https://leafletjs.com/){:target="_blank"}, a JavaScript library that is used for map visualizations, in order to visualize some of our findings.
 
 So, the plan looks something like this:
 - Set up Postgres database with PostGIS extension
@@ -20,7 +20,10 @@ If this means nothing to you, then great! I'll provide plently of detail. If it'
 This post should hopefully be comprehensible by people with minimal computer experience.
 
 # Lets do it
-It will probably be easiest if you use the exact same setup as me, so I think it's best that you get a "droplet" set up on [Digital Ocean](https://www.digitalocean.com/products/droplets/){:target="_blank"}. A droplet is just a virtual machine (basically a server) that you can get in the "cloud". Oooooh. Heard of the cloud before? It's a beautiful, fluffy place. Once you create an account, you will be able to get a server with lots of resources (don't worry, we'll use one with very few resources) in a matter of seconds. I like Digital Ocean for its simple interface and simple pricing. With [AWS](https://aws.amazon.com){:target="_blank"} I often struggle to understand how much I'll be paying. Using a server will be nice to make sure we don't ruin our own personal machines, and also to have enough hard disk space (the dataset is big). Also, the $5 monthly fee is pro-rated, so if you finish this demo in a few hours, you'll be paying pennies.
+## Digital Ocean
+It will probably be easiest if you use the exact same setup as me, so I think it's best that you get a "droplet" set up on [Digital Ocean](https://m.do.co/c/d1af2197f842){:target="_blank"}. A droplet is just a virtual machine (basically a server) that you can get in the "cloud". Oooooh. Heard of the cloud before? It's a beautiful, white, fluffy place. Once you create an account, you will be able to get a server with lots of resources (don't worry, we'll use one with very few resources) in a matter of seconds. I like Digital Ocean for its simple interface and simple pricing. With [AWS](https://aws.amazon.com){:target="_blank"} I often struggle to understand how much I'll be paying. Using a server will be nice to make sure we don't ruin our own personal machines, and also to have enough hard disk space (the dataset is big). Also, the $5 monthly fee is pro-rated, so if you finish this demo in a few hours, you'll be paying pennies.
+
+If you don't want to pay anything, you are more than welcome to get Postgres set up on your own machine. You'll just have to look elsewhere on the web for instructions for this part of the post.
 
 Once you create your account, you'll want to create a new droplet by clicking on
 "Create" in the top right of the dashboard:
@@ -31,7 +34,7 @@ Then choose Ubuntu 16.0.4, Standard plan. These should be the default.
 
 ![droplet-1](/public/droplet-1.png)
 
-Be sure to get the cheapest droplet, at $5 a month
+Be sure to get the cheapest droplet, at $5 a month. To reiterate, this is pro-rated and you can very easily destroy a droplet and close out your account.
 
 ![5-dollar](/public/5-dollar.png)
 
@@ -47,60 +50,70 @@ Now, create the droplet and head back to the Digital Ocean dashboard. You should
 
 ![dashboard-ip](/public/dashboard-ip.png)
 
-Now in your Terminal, run `ssh root@<IP ADDRESS HERE>`. So I'll run `ssh root@206.189.194.182`. 
+Now in your Terminal, run `ssh root@<IP ADDRESS HERE>`. So I'll run `ssh root@206.189.194.182`.
 
+## Postgres
 You should be logged on to the server now. Let's download the Postgres database now. Type `vim /etc/apt/sources.list.d/pgdg.list`. `vim` is a Terminal-based text editor. When you open it, you start out in "normal" mode. In normal mode, you can't type anything. So hit `i` to enter insert mode, and type `deb http://apt.postgresql.org/pub/repos/apt/ xenial-pgdg main`. Then hit the escape key, and type `:wq` and then Enter to exit `vim` and save the changes to the file. By adding this to the file, we're enabling the program `apt` to download Postgres for us from this repository. `apt` comes with certain Linux distributions, and is a really handy way to download programs. Also, run `sudo wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -` to enable us to install Postgres. Then, simply  run `sudo apt-get update` in order to pull in this new repository. Then, run `sudo apt-get install postgis`. Then, run `sudo su - postgres` to change the user you're currently running as from `root` to the user named `postgres`, which should have been automatically created when you install PostGIS and Postgres. Then, run `psql`.
 
 If this all worked, you should now be logged in to a Postgres database instance. It should look like the below picture. If so, congrats! We're almost ready to make really cool maps and stuffs. 
 
 ![postgres-initial](/public/postgres-initial.png)
 
-When you log in to the Postgres database, you're initially put in a default database called "postgres". Let's make our own to make everything clean:
+When you log in to the Postgres server, you're initially put in a default database called "postgres". Let's make our own database to store the rideshare data:
 
-`create database rideshare;`
+```sql
+CREATE DATABASE rideshare;
+```
 
 Then, let's change to this database:
 
-`\c rideshare`
+```sql
+\c rideshare
+```
 
 You should see `psql` say something like `You are now connected to database "rideshare" as user "postgres".`.
 
-
 Now, let's create a user that can login to the database:
 
-`create user rideshare with password 'rideshare';`
+```sql
+CREATE USER rideshare WITH PASSWORD 'rideshare';
+```
 
 Then, since we don't really care about security, let's make this user with a very easily-guessable password the owner of our new rideshare database:
 
-`alter database rideshare owner to rideshare;`
+```sql
+ALTER DATABASE rideshare OWNER TO rideshare;
+```
 
 Now, if we login as user "rideshare", with password "rideshare", we can do anything in the "rideshare" database. Now, let's install PostGIS to let us store and query geographic data:
 
-`CREATE EXTENSION postgis;
-CREATE EXTENSION postgis_topology;`
+```
+CREATE EXTENSION postgis;
+CREATE EXTENSION postgis_topology;
+```
 
 Now, let's create a table to store all the trip data. I'll call it "trip". A table is more or less an Excel sheet but in database world. Wow this is getting exciting.
 
-```
-create table trip (
-	trip_id char(40) unique,
-	trip_start_timestamp timestamp not null,
-	trip_end_timestamp timestamp not null,
-	trip_seconds int not null,
-	trip_miles numeric(8, 1) not null,
-	pickup_census_tract bigint null,
-	dropoff_census_tract bigint null,
-	fare numeric(8, 2) not null,
-	tip smallint not null,
+```sql
+CREATE TABLE trip (
+	trip_id char(40) UNIQUE,
+	trip_start_timestamp timestamp NOT NULL,
+	trip_end_timestamp timestamp NOT NULL,
+	trip_seconds int NOT NULL,
+	trip_miles numeric(8, 1) NOT NULL,
+	pickup_census_tract bigint,
+	dropoff_census_tract bigint,
+	fare numeric(8, 2) NOT NULL,
+	tip smallint NOT NULL,
 	additional_charges numeric(8, 2),
-	shared_trip_authorized boolean not null,
-	trips_pooled smallint not null,
+	shared_trip_authorized boolean NOT NULL,
+	trips_pooled smallint NOT NULL,
 	pickup_centroid_location geometry(POINT, 4326),
 	dropoff_centroid_location geometry(POINT, 4326)
 );
 ```
 
-These columns align 1-to-1 with the columns in the [dataset](https://data.cityofchicago.org/Transportation/Transportation-Network-Providers-Trips/m6dm-c72p/data){:target="_blank"}. Notice the last two columns are of type `geometry(POINT, 4326)`. This datatype is provided to us by the PostGIS extension that we installed. If you're at the point in the blog post where you're ready to start browsing through an incredible amount of unrelated web pages, this is your chance. Let me get you started. 4326 is the [European Petroleum Survey Group (EPSG) code](https://spatialreference.org/ref/epsg/4326/){:target="_blank"} for the [World Geodetic System](https://en.wikipedia.org/wiki/World_Geodetic_System){:target="_blank"} (used in GPS). The EPSG no longer exists, it was merged into the International Association of Oil & Gas Producers, but the EPSG acronym stuck. You're probably most familiar with EPSG 4326. It's basically lat/lon. So since the City of Chicago gives us the data in lat/lon, we'll import it as such. There are two types of columns in PostGIS, `geometry` and `geography`. Geography handles issues with arcs (the world isn't [flat](https://theflatearthsociety.org/home/){:target="_blank"}), but is slower and less feature-rich. Since our data is very local, these issues shouldn't matter to us. I personally still cannot understand how inputting data as 4326 but storing it as a `geometry` makes any sense, but we'll do it anyway for now. My understanding was that geometries had to be projected data. But maybe `gometry(4326)` is an unprojected projection? If you're reading this and have any input on this, please leave a comment!
+These columns align 1-to-1 with the columns in the [dataset](https://data.cityofchicago.org/Transportation/Transportation-Network-Providers-Trips/m6dm-c72p/data){:target="_blank"}. Notice the last two columns are of type `geometry(POINT, 4326)`. This datatype is provided to us by the PostGIS extension that we installed. If you're at the point in the blog post where you're ready to start browsing through an incredible amount of unrelated web pages, this is your chance. Let me get you started. 4326 is the [European Petroleum Survey Group (EPSG) code](https://spatialreference.org/ref/epsg/4326/){:target="_blank"} for the [World Geodetic System](https://en.wikipedia.org/wiki/World_Geodetic_System){:target="_blank"} (used in GPS). The EPSG no longer exists, it was merged into the International Association of Oil & Gas Producers, but the EPSG acronym stuck. You're probably most familiar with EPSG 4326 even if you've never heard of it. It's basically lat/lon. So since the City of Chicago gives us the data in lat/lon, we'll import it as such. There are two types of columns in PostGIS, `geometry` and `geography`. Geography handles issues with arcs (the world isn't [flat](https://theflatearthsociety.org/home/){:target="_blank"}), but is slower and less feature-rich. Since our data points are very close together, these curved-earth issues shouldn't matter to us. I personally still cannot understand how inputting data as 4326 but storing it as a `geometry` makes any sense, but we'll do it anyway for now. My understanding was that geometries had to be projected data. But maybe `gometry(4326)` is an unprojected projection? If you're reading this and have any input on this, please leave a comment!
 
 I found [this post](http://lyzidiamond.com/posts/4326-vs-3857){:target="_blank"} by Lyzi Diamond from Mapbox quite useful. It explains the differences between the two most common EPSG projections for the web, 4326 and 3857. If you don't read that article, at least watch [this video](https://youtu.be/eLqC3FNNOaI){:target="_blank"} from the West Wing. It's fantastic.
 
@@ -116,8 +129,15 @@ Ok folks, I can tell the anticipation is building. It's time to import 17 MILLIO
 
 Run `wget -O tripdata.csv https://data.cityofchicago.org/api/views/m6dm-c72p/rows.csv?accessType=DOWNLOAD` to download the dataset into a csv. This might take a while... (took me about 20 minutes)
 
-Now, for the slowest, most exciting part of our journey together. Getting the data into Postgres. Take a look at the [Python script](https://github.com/samc1213/chicago-rideshare/blob/master/import_rows.py){:target="_blank"} I wrote. You can download it by running `wget -O import_rows.py https://raw.githubusercontent.com/samc1213/chicago-rideshare/master/import_rows.py`. Make sure the `rideshare_env` environment is still activated (it will show up in the terminal prompt). Then run the script using `python import_rows.py`.  If it's working, it will print every 1000 rows that it imports. Yes, it has to get to 17 million, so go for a run, or to grab a nice juicy cheeseburger once you see it hit 10,000 or so.
+Now, for the slowest, most exciting part of our journey together. Getting the data into Postgres. Take a look at the [Python script](https://github.com/samc1213/chicago-rideshare/blob/master/import_rows.py){:target="_blank"} I wrote. You can download it by running `wget -O import_rows.py https://raw.githubusercontent.com/samc1213/chicago-rideshare/master/import_rows.py`. Make sure the `rideshare_env` environment is still activated (it will show up in the terminal prompt). Then run the script using `python import_rows.py`.  If it's working, it will print every 1000 rows that it imports. Yes, it has to get to 17 million, so go for a run, or to grab a nice juicy cheeseburger once you see it hit 10,000 or so. This part took me about an hour.
 
+
+<div>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA==" crossorigin=""/>
+	<script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js" integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg==" crossorigin=""></script>
+	<div id="map" style="height:500px;"></div>
+	<script src="https://raw.githubusercontent.com/samc1213/chicago-rideshare/master/tip_by_census_dropoff.js"></script>
+</div>
 
 Ubuntu 16.0.4...
 
