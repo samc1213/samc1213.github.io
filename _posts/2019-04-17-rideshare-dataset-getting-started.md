@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Chicago Open Rideshare Dataset: Getting Started
+title: Introducing Hyde
 ---
 
 # Introduction
