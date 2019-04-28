@@ -129,7 +129,7 @@ Ok folks, I can tell the anticipation is building. It's time to import 17 MILLIO
 
 Run `wget -O tripdata.csv https://data.cityofchicago.org/api/views/m6dm-c72p/rows.csv?accessType=DOWNLOAD` to download the dataset into a csv. This might take a while... (took me about 20 minutes)
 
-Now, for the slowest, most exciting part of our journey together. Getting the data into Postgres. Take a look at the [Python script](https://github.com/samc1213/chicago-rideshare/blob/master/import_rows.py){:target="_blank"} I wrote. You can download it by running `wget -O import_rows.py https://raw.githubusercontent.com/samc1213/chicago-rideshare/master/import_rows.py`. Make sure the `rideshare_env` environment is still activated (it will show up in the terminal prompt). Then run the script using `python import_rows.py`.  If it's working, it will print every 1000 rows that it imports. Yes, it has to get to 17 million, so go for a run, or to grab a nice juicy cheeseburger once you see it hit 10,000 or so. This part took me about an hour.
+Now, for the slowest, most exciting part of our journey together. Getting the data into Postgres. Take a look at the [Python script](https://github.com/samc1213/chicago-rideshare/blob/master/import_rows.py){:target="_blank"} I wrote. You can download it by running `wget -O import_rows.py https://raw.githubusercontent.com/samc1213/chicago-rideshare/master/import_rows.py`. Make sure the `rideshare_env` environment is still activated (it will show up in the terminal prompt). Then run the script using `python import_rows.py`.  If it's working, it will print every 1000 rows that it imports. Yes, it has to get to 17 million, so go for a run, or grab a nice juicy cheeseburger once you see the script get started. This part took me about an hour.
 
 
 <div>
@@ -138,6 +138,64 @@ Now, for the slowest, most exciting part of our journey together. Getting the da
 	<div id="map" style="height:500px;"></div>
 	<script type="text/javascript" src="/public/chicago-rideshare/tip_by_census_dropoff.js"></script>
 </div>
+
+## Data Extraction
+This is actually the fun part now. We need to get the data out of the database and into a gorgeous map that we can hang on the wall. I'm not creative, so the first thing I thought to look at was tipping. I wanted to map the ratio of tip to trip distance by dropoff census tract.
+
+We'll use a toolchain called [GDAL](https://www.gdal.org){:target="_blank"} to run queries on the Postgres database, and return the result of the query in a format called [GeoJSON](http://geojson.org){:target="_blank"}. The specific tool to do this is called `ogr2ogr`. It also works in the reverse direction. That is, given a GeoJSON file, it can import data into Postgres for us. This feature will be nice, since our dataset currently only contains dropoff_centroid_locations. We really want the entire geometry of the census tract in order to map the results nicely. Thankfully, the City of Chicago provides a nice GeoJSON file that gives the [geometries of every census tract in Chicago](https://www.chicago.gov/city/en/depts/doit/dataset/boundaries_-_censustracts.html){:target="_blank"}.
+
+First, run `sudo apt install gdal-bin` to install the GDAL tools. Then, download the City's census tract dataset:
+```
+wget -O censustracts.geojson "https://data.cityofchicago.org/api/geospatial/5jrd-6zik?method=export&format=GeoJSON"
+```
+
+Then, use the new GDAL tool to import the data:
+```
+ogr2ogr -f "PostgreSQL" PG:"dbname=rideshare user=rideshare password=rideshare host=localhost port=5432" censustracts.geojson
+```
+
+Log back in to the database using `psql --dbname=rideshare --host=localhost --port=5432 --username=rideshare` (top-secret password is "rideshare", don't forget it), and run `\d`
+
+![gdal-census-import](/public/gdal-census-import.png)
+
+We see that the tool seemed to create a table called `ogrgeojson` for us. Let's learn what's in that by running `\d ogrgeojson`:
+
+![orgr-table](/public/orgr-table.png)
+
+We can also run `SELECT * FROM ogrgeojson LIMIT 1;` to see an example of what's in the table. Looks like the column `geoid10` maps to the `dropoff_census_tract` and `pickup_census_tract` column from the rideshare database. Also, looks like the `wkb_geometry` column has the `ST_MultiPolygon` that draws out for us the boundaries of the tract (`SELECT ST_geometrytype(wkb_geometry) FROM ogrgeojson;
+` shows that). Great! So we can combine this census tract data with the rideshare data to make a pretty map. I personally hate the table name `ogrgeojson`. Plus some of the data in there is unneeded. Let's make our own table with a nice name and clean data:
+
+```sql
+CREATE TABLE census_tract (
+	census_tract_id bigint UNIQUE,
+	tract_name varchar(50),
+	tract_geometry geometry(multipolygon, 4326)
+);
+INSERT INTO census_tract SELECT cast(geoid10 as bigint), name10, wkb_geometry FROM ogrgeojson;
+
+```
+
+Now, let's make a table to temporarily store the data we need for our pretty map. This will just have the data by `dropoff_census_tract`, which is just an id. We'll have to combine this with the `census_tract` data to get the whole geometry of the census tract itself.
+
+```sql
+CREATE TABLE tip_by_tract AS
+SELECT dropoff_census_tract, avg(tip/t.fare)
+FROM trip t
+WHERE t.fare != 0 GROUP BY dropoff_census_tract;
+```
+
+This query might take a little while. We've got 17,000,000 unindexed rows to go through. Took me a minute or two.
+
+Now, lets make sure the data in the `tip_by_tract` table maps up to the `census_tract` data nicely. We'll use a `JOIN` for this. If you're new to SQL, you might want to read up on `JOIN`s. I like to think of a join like this: _Take the [Cartesian product](https://en.wikipedia.org/wiki/Cartesian_product) of all of the rows in each of the two tables you are joining (in our case, `tip_by_tract` and `census_tract`). Then, evaluate the `ON` clause for each of the pairs of rows (`c.census_tract_id=t.dropoff_census_tract`). If the `ON` clause is true, then return that row in the result. Otherwise, throw it out._
+
+```sql
+SELECT *
+FROM tip_by_tract t
+JOIN census_tract c
+ON c.census_tract_id=t.dropoff_census_tract;
+```
+
+This seems to work fine, but it's hard to look at in `psql`. Let's get it out into GeoJSON and view it in a map 
 
 Ubuntu 16.0.4...
 

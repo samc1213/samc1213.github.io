@@ -4,13 +4,6 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 }).addTo(map);
 
-let url = 'https://raw.githubusercontent.com/samc1213/chicago-rideshare/master/tip_by_census_dropoff.geojson';
-fetch(url).then(r => {
-	return r.json();
-}).then(data => {
-	L.geoJSON(data.features).addTo(map);
-});
-
 function getColor(d) {
     return d > .07 ? '#800026' :
            d > .06  ? '#BD0026' :
@@ -33,5 +26,9 @@ function style(feature) {
     };
 }
 
-
-a = L.geoJSON(JSON.parse(data), {style: style}).addTo(map);
+let url = 'https://raw.githubusercontent.com/samc1213/chicago-rideshare/master/tip_by_census_dropoff.geojson';
+fetch(url).then(r => {
+	return r.json();
+}).then(data => {
+	L.geoJSON(data, {style: style}).addTo(map);
+});
