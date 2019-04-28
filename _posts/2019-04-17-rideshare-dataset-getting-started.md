@@ -82,11 +82,28 @@ CREATE EXTENSION postgis_topology;`
 
 Now, let's create a table to store all the trip data. I'll call it "trip". A table is more or less an Excel sheet but in database world. Wow this is getting exciting.
 
-`create table trip (trip_id char(40) unique, trip_start_timestamp timestamp not null, trip_end_timestamp timestamp not null, trip_seconds int not null, trip_miles numeric(8, 1) not null, pickup_census_tract bigint null, dropoff_census_tract bigint null, fare numeric(8, 2) not null, tip smallint not null, additional_charges numeric(8, 2), shared_trip_authorized boolean not null, trips_pooled smallint not null, pickup_centroid_location geometry(POINT, 4326), dropoff_centroid_location geometry(POINT, 4326));`
+`create table trip (
+	trip_id char(40) unique,
+	trip_start_timestamp timestamp not null,
+	trip_end_timestamp timestamp not null,
+	trip_seconds int not null,
+	trip_miles numeric(8, 1) not null,
+	pickup_census_tract bigint null,
+	dropoff_census_tract bigint null,
+	fare numeric(8, 2) not null,
+	tip smallint not null,
+	additional_charges numeric(8, 2),
+	shared_trip_authorized boolean not null,
+	trips_pooled smallint not null,
+	pickup_centroid_location geometry(POINT, 4326),
+	dropoff_centroid_location geometry(POINT, 4326)
+);`
 
-These columns align 1-to-1 with the columns in the [dataset](https://data.cityofchicago.org/Transportation/Transportation-Network-Providers-Trips/m6dm-c72p/data). Now, we need to download the data from the City of Chicago website, and get it into this darned database.
+These columns align 1-to-1 with the columns in the [dataset](https://data.cityofchicago.org/Transportation/Transportation-Network-Providers-Trips/m6dm-c72p/data). Notice the last two columns are of type `geometry(POINT, 4326)`. This datatype is provided to us by the PostGIS extension that we installed. If you're at the point in the blog post where you're ready to start browsing through an incredible amount of unrelated web pages, this is your chance. Let me get you started. 4326 is the [European Petroleum Survey Group (EPSG) code](https://spatialreference.org/ref/epsg/4326/) for the [World Geodetic System](https://en.wikipedia.org/wiki/World_Geodetic_System) (used in GPS). The EPSG no longer exists, it was merged into the International Association of Oil & Gas Producers, but the EPSG acronym stuck. You're probably most familiar with EPSG 4326. It's basically lat/lon. So since the City of Chicago gives us the data in lat/lon, we'll import it as such.
 
-We'll need to do some small tranformations on the data downloaded from the City in order to import it. Python is a great scripting language perfect for this task.
+I found [this post](http://lyzidiamond.com/posts/4326-vs-3857) by Lyzi Diamond from Mapbox quite useful. It explains the differences between the two most common EPSG projections for the web, 4326 and 3857. If you don't read that article, at least watch [this video](https://youtu.be/eLqC3FNNOaI) from the West Wing. It's fantastic.
+
+Now, we need to download the data from the City of Chicago website, and get it into this darned database. We'll need to do some small tranformations on the data downloaded from the City in order to import it. Python is a great scripting language perfect for this task.
 
 Let's exit out of `psql` by running `\q`. We should now be back in our normal ssh terminal. Let's type `exit` again, so that instead of being logged in as the `postgres` user, we're logged in as `root`. You should see something like the below:
 
@@ -98,6 +115,7 @@ Ok folks, I can tell the anticipation is building. It's time to import 17 MILLIO
 
 Run `wget -O tripdata.csv https://data.cityofchicago.org/api/views/m6dm-c72p/rows.csv?accessType=DOWNLOAD` to download the dataset into a csv. This might take a while... (took me about 20 minutes)
 
+Now, for the slowest, most exciting part of our journey together. Getting the data into Postgres. Take a look at the [Python script](https://github.com/samc1213/chicago-rideshare/blob/master/import_rows.py) I wrote. You can download it by running `wget -O import_rows.py https://raw.githubusercontent.com/samc1213/chicago-rideshare/master/import_rows.py`. Make sure the `rideshare_env` environment is still activated (it will show up in the terminal prompt). Then run the script using `python import_rows.py`.  If it's working, it will print every 1000 rows that it imports. Yes, it has to get to 17 million, so go for a run, or to grab a nice juicy cheeseburger once you see it hit 10,000 or so.
 
 
 Ubuntu 16.0.4...
