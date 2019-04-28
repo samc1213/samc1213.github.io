@@ -5,7 +5,7 @@ preview: How to get started with mapping GIS data
 ---
 
 # Introduction
-I was recently reading Steve Vance and John Greenfield's [article](https://chi.streetsblog.org/2019/04/18/the-most-common-chicago-ride-hailing-trip-is-a-1-mile-hop-from-river-north-to-loop/){:target="_blank"} summarizing data from the City of Chicago's publishing of anonymized [ride hailing data](https://data.cityofchicago.org/Transportation/Transportation-Network-Providers-Trips/m6dm-c72p){:target="_blank"}. I figured I would play around with the data, to at least learn some new skills, and at most find something interesting in the dataset. I also wanted to share with others how I went about the technical aspects of my analyses. So here we go...
+I was recently reading Steve Vance and John Greenfield's [article](https://chi.streetsblog.org/2019/04/18/the-most-common-chicago-ride-hailing-trip-is-a-1-mile-hop-from-river-north-to-loop/){:target="_blank"} summarizing data from the City of Chicago's publishing of anonymized [ride hailing data](https://data.cityofchicago.org/Transportation/Transportation-Network-Providers-Trips/m6dm-c72p){:target="_blank"}. I figured I would play around with the data, to at least learn some new skills, and at most find something interesting in the dataset. I also wanted to share with others how I went about the technical aspects of my exploration. So here we go...
 
 # The plan
 I did some research, and found that [PostGIS](https://postgis.net){:target="_blank"} is a very popular, open-source Postgres extension for dealing with GIS data. [Postgres](https://www.postgresql.org/){:target="_blank"} is a relational SQL database, but doesn't have any GIS capabilities out of the box. I've used Postgres before. Postgres could help us answer questions like "Which census tract paid the most in tips?". I also want to use [Leaflet](https://leafletjs.com/){:target="_blank"}, a JavaScript library that is used for map visualizations, in order to visualize some of our findings.
@@ -309,5 +309,5 @@ When you open up `index.html` in your browser, you should see something that loo
 Beautiful, isn't it? If this didn't work for you, check out my small Github [repo](https://github.com/samc1213/chicago-rideshare) that contains the demo.
 
 ## Next Steps
-I'm honestly not that satisfied with these results from an analytical perspective. If you have any ideas of things to look at in the dataset, please leave a comment below. With this framework set up, it should be much easier to do additional analysis.
+I'm honestly not that satisfied with these results from an analytical perspective. If you have any ideas of things to look at in the dataset, please leave a comment below. With this framework set up, it should be much easier to do additional analysis. I plan on following up with more maps and analyses in future posts.
 

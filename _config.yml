@@ -5,7 +5,7 @@ highlighter:      rouge
 permalink:        pretty
 
 # Setup
-title:            Code With Coco
+title:            Sam Blogs
 tagline:          'A _fun_ blog'
 baseurl:          /
 description:      'My first ever web log'
