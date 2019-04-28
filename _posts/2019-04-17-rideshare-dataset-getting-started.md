@@ -67,7 +67,7 @@ CREATE DATABASE rideshare;
 
 Then, let's change to this database:
 
-```sql
+```
 \c rideshare
 ```
 
@@ -87,7 +87,7 @@ ALTER DATABASE rideshare OWNER TO rideshare;
 
 Now, if we login as user "rideshare", with password "rideshare", we can do anything in the "rideshare" database. Now, let's install PostGIS to let us store and query geographic data:
 
-```
+```sql
 CREATE EXTENSION postgis;
 CREATE EXTENSION postgis_topology;
 ```
@@ -136,7 +136,7 @@ Now, for the slowest, most exciting part of our journey together. Getting the da
 	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA==" crossorigin=""/>
 	<script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js" integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg==" crossorigin=""></script>
 	<div id="map" style="height:500px;"></div>
-	<script src="https://raw.githubusercontent.com/samc1213/chicago-rideshare/master/tip_by_census_dropoff.js"></script>
+	<script type="text/javascript" src="https://raw.githubusercontent.com/samc1213/chicago-rideshare/master/tip_by_census_dropoff.js"></script>
 </div>
 
 Ubuntu 16.0.4...
