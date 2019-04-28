@@ -96,7 +96,9 @@ Let's exit out of `psql` by running `\q`. We should now be back in our normal ss
 
 Ok folks, I can tell the anticipation is building. It's time to import 17 MILLION rows of data into our database. 
 
-Run `wget -O tripdata.csv https://data.cityofchicago.org/api/views/m6dm-c72p/rows.csv?accessType=DOWNLOAD` to download the dataset into a csv. This might take a while...
+Run `wget -O tripdata.csv https://data.cityofchicago.org/api/views/m6dm-c72p/rows.csv?accessType=DOWNLOAD` to download the dataset into a csv. This might take a while... (took me about 20 minutes)
+
+
 
 Ubuntu 16.0.4...
 
