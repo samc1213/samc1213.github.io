@@ -11,8 +11,8 @@ title: Home
         {{ post.title }}
       </a>
     </h1>
-    <h4>{{ post.preview }}</h4>
     <span class="post-date">{{ post.date | date_to_string }}</span>
+    <h4 style="font-style: italic;">{{ post.preview }}</h4>
   </div>
   {% endfor %}
 </div>
