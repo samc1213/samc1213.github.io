@@ -38,11 +38,11 @@ Be sure to get the cheapest droplet, at $5 a month. To reiterate, this is pro-ra
 
 ![5-dollar](/public/5-dollar.png)
 
-Now, for the important part. Add a new ssh key,
+Now, for the important part. Add a new ssh key:
 
 ![new-ssh](/public/new-ssh.png)
 
-Now, we need to generate an ssh key on our local machine. Ssh stands for "secure shell", and is a secure way to remotely access a server. We need to generate the a secure key that we'll give to Digital Ocean, so that when we try to login to our server, Digital Ocean will know that we're authorized to access the machine. To generate an ssh key, open up your Terminal application (I'm on OS X, but if you're on Windows, open up [Git bash](https://git-scm.com/downloads){:target="_blank"} instead of the normal Windows command prompt). Type `ssh-keygen`, and hit enter to use all the defaults. Next, type `vim ~/.ssh/id_rsa.pub`. You should see a bunch of letters that mean nothing to you. Go ahead and copy this entire string into Digital Ocean.
+Now, we need to generate an ssh key on our local machine. Ssh stands for "secure shell", and is a secure way to remotely access a server. We need to generate the a secure key that we'll give to Digital Ocean, so that when we try to login to our server, Digital Ocean will know that we're authorized to access the machine. To generate an ssh key, open up your Terminal application (I'm on OS X, but if you're on Windows, open up [Git bash](https://git-scm.com/downloads){:target="_blank"} instead of the normal Windows command prompt). Type `ssh-keygen`, and hit enter to use all the defaults. Next, type `cat ~/.ssh/id_rsa.pub`. You should see a bunch of letters that mean nothing to you. Go ahead and copy this entire string into Digital Ocean.
 
 ![add-ssh](/public/add-ssh.png)
 
@@ -50,10 +50,10 @@ Now, create the droplet and head back to the Digital Ocean dashboard. You should
 
 ![dashboard-ip](/public/dashboard-ip.png)
 
-Now in your Terminal, run `ssh root@<IP ADDRESS HERE>`. So I'll run `ssh root@206.189.194.182`.
+Now in your Terminal, run `ssh root@<IP ADDRESS HERE>`. So I'll run `ssh root@206.189.194.182`. You should be logged on to the server now.
 
 ## Postgres
-You should be logged on to the server now. Let's download the Postgres database now. Type `vim /etc/apt/sources.list.d/pgdg.list`. `vim` is a Terminal-based text editor. When you open it, you start out in "normal" mode. In normal mode, you can't type anything. So hit `i` to enter insert mode, and type `deb http://apt.postgresql.org/pub/repos/apt/ xenial-pgdg main`. Then hit the escape key, and type `:wq` and then Enter to exit `vim` and save the changes to the file. By adding this to the file, we're enabling the program `apt` to download Postgres for us from this repository. `apt` comes with certain Linux distributions, and is a really handy way to download programs. Also, run `sudo wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -` to enable us to install Postgres. Then, simply  run `sudo apt-get update` in order to pull in this new repository. Then, run `sudo apt-get install postgis`. Then, run `sudo su - postgres` to change the user you're currently running as from `root` to the user named `postgres`, which should have been automatically created when you install PostGIS and Postgres. Then, run `psql`.
+Let's download Postgres. Type `vim /etc/apt/sources.list.d/pgdg.list`. `vim` is a Terminal-based text editor. When you open it, you start out in "normal" mode. In normal mode, you can't type anything. So hit `i` to enter insert mode, and type `deb http://apt.postgresql.org/pub/repos/apt/ xenial-pgdg main`. Then hit the escape key, and type `:wq` and then Enter to exit `vim` and save the changes to the file. By adding this to the file, we're enabling the program `apt` to download Postgres for us from this repository. `apt` comes with certain Linux distributions, and is a really handy way to download programs. Also, run `wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -`. Then, simply  run `apt-get update` in order to pull in this new repository. Then, run `apt-get install postgis`. Then, run `sudo su - postgres` to change the user you're currently running as from `root` to the user named `postgres`, which should have been automatically created when you install PostGIS and Postgres. Then, run `psql`.
 
 If this all worked, you should now be logged in to a Postgres database instance. It should look like the below picture. If so, congrats! We're almost ready to make really cool maps and stuffs. 
 
@@ -136,7 +136,7 @@ Now, for the slowest, most exciting part of our journey together. Getting the da
 	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA==" crossorigin=""/>
 	<script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js" integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg==" crossorigin=""></script>
 	<div id="map" style="height:500px;"></div>
-	<script type="text/javascript" src="https://raw.githubusercontent.com/samc1213/chicago-rideshare/master/tip_by_census_dropoff.js"></script>
+	<script type="text/javascript" src="/public/chicago-rideshare/tip_by_census_dropoff.js"></script>
 </div>
 
 Ubuntu 16.0.4...
