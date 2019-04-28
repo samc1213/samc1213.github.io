@@ -11,11 +11,8 @@ title: Home
         {{ post.title }}
       </a>
     </h1>
-
+    <h4>{{ post.preview }}</h4>
     <span class="post-date">{{ post.date | date_to_string }}</span>
-
-    {{ post.content | strip_html | truncatewords:75}}
-    <span><a href="{{ post.url }}">Read more...</a></span>
   </div>
   {% endfor %}
 </div>

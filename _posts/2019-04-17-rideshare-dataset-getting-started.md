@@ -1,6 +1,7 @@
 ---
 layout: post
 title: Chicago Open Rideshare Dataset - Getting Started
+preview: How to get started with mapping GIS data
 ---
 
 # Introduction
