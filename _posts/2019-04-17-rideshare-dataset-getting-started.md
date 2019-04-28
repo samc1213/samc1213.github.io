@@ -3,7 +3,6 @@ layout: post
 title: Chicago Open Rideshare Dataset: Getting Started
 ---
 
-
 # Introduction
 I was recently reading Steve Vance and John Greenfield's [article](https://chi.streetsblog.org/2019/04/18/the-most-common-chicago-ride-hailing-trip-is-a-1-mile-hop-from-river-north-to-loop/) summarizing data from the City of Chicago's recent opening of anonymized [ride hailing data](https://data.cityofchicago.org/Transportation/Transportation-Network-Providers-Trips/m6dm-c72p). I figured I would play around with the data, to at least learn something new myself, and at most find something interesting in the dataset. I also wanted to share with others how I went about the technical aspects of my analyses. So here we go...
 
