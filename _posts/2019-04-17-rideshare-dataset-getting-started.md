@@ -1,7 +1,7 @@
-----
+---
 layout: post
 title: Chicago Open Rideshare Dataset: Getting Started
-----
+---
 
 
 # Introduction
