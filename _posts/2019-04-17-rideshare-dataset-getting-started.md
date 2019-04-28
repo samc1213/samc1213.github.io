@@ -132,13 +132,6 @@ Run `wget -O tripdata.csv https://data.cityofchicago.org/api/views/m6dm-c72p/row
 Now, for the slowest, most exciting part of our journey together. Getting the data into Postgres. Take a look at the [Python script](https://github.com/samc1213/chicago-rideshare/blob/master/import_rows.py){:target="_blank"} I wrote. You can download it by running `wget -O import_rows.py https://raw.githubusercontent.com/samc1213/chicago-rideshare/master/import_rows.py`. Make sure the `rideshare_env` environment is still activated (it will show up in the terminal prompt). Then run the script using `python import_rows.py`.  If it's working, it will print every 1000 rows that it imports. Yes, it has to get to 17 million, so go for a run, or grab a nice juicy cheeseburger once you see the script get started. This part took me about an hour.
 
 
-<div>
-	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA==" crossorigin=""/>
-	<script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js" integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg==" crossorigin=""></script>
-	<div id="map" style="height:500px;"></div>
-	<script type="text/javascript" src="/public/chicago-rideshare/tip_by_census_dropoff.js"></script>
-</div>
-
 ## Data Extraction
 This is actually the fun part now. We need to get the data out of the database and into a gorgeous map that we can hang on the wall. I'm not creative, so the first thing I thought to look at was tipping. I wanted to map the ratio of tip to trip distance by dropoff census tract.
 
@@ -195,120 +188,71 @@ JOIN census_tract c
 ON c.census_tract_id=t.dropoff_census_tract;
 ```
 
-This seems to work fine, but it's hard to look at in `psql`. Let's get it out into GeoJSON and view it in a map 
+This seems to work fine, but it's hard to look at in `psql`. Let's get it out into GeoJSON and view it in a map. Run `\q` to go back to the command line.
 
-Ubuntu 16.0.4...
+```
+ogr2ogr -f "GeoJSON" tip_by_census_dropoff.geojson PG:"dbname=rideshare user=rideshare password=rideshare host=localhost port=5432" -sql "SELECT * FROM tip_by_tract t JOIN census_tract c ON c.census_tract_id=t.dropoff_census_tract;"
+```
 
-"deb http://apt.postgresql.org/pub/repos/apt/ xenial-pgdg main" in "/etc/apt/sources.list.d/pgdg.list"
+That will write the results of the query to a file called `tip_by_census_dropoff.geojson`. All we need to do is map this file. Type `pwd` to see what directory you've been working in this whole time. I've been in `/root`. We can open up a new terminal window, and run `scp root@206.189.194.182:/root/censustracts.geojson .`. You'll want to sub in the IP address of your Digital Ocean server for mine. This will copy the geojson file to your local machine. Then, create a file called `index.html` in the same directory as the geojson file on your local machine. It should look something like this
 
-sudo "wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -"
+```html
+ <head>
+ <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA==" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js" integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg==" crossorigin=""></script>
 
-sudo apt-get install postgis 
+</head>
+<body>
+	<div id="map" style="height:500px;"></div>
+</body>
+<script src="my-map.js"></script>
+```
 
-sudo su -  postgres
+Then, create a new file called `my-map.js` in the same directory, and put the below into it:
 
-/usr/lib/postgresql/11/bin/pg_ctl -D /etc/postgresql/11/main -l /var/log/postgresql/postgresql-11-main.log start
+```
+var map = L.map('map').setView([41.881832, -87.623177], 12);
 
-psql -p 5433
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+}).addTo(map);
 
-create database rideshare;
+let data = `
+<COPY PASTE THE WHOLE GEOJSON FILE HERE>
+`;
 
-\c rideshare;
+function getColor(d) {
+    return d > .07 ? '#800026' :
+           d > .06 ? '#BD0026' :
+           d > .05 ? '#E31A1C' :
+           d > .04 ? '#FC4E2A' :
+           d > .03 ? '#FD8D3C' :
+           d > .02 ? '#FEB24C' :
+           d > .01 ? '#FED976' :
+                     '#FFEDA0';
+}
 
-create user rideshare with password 'rideshare';
-
-alter database rideshare owner to rideshare;
-
-CREATE EXTENSION postgis;
-
-CREATE EXTENSION postgis_topology;
-
-create table trip (trip_id char(40) unique, trip_start_timestamp timestamp not null, trip_end_timestamp timestamp not null, trip_seconds int not null, trip_miles numeric(8, 1) not null, pickup_census_tract bigint null, dropoff_census_tract bigint null, fare numeric(8, 2) not null, tip smallint not null, additional_charges numeric(8, 2), shared_trip_authorized boolean not null, trips_pooled smallint not null, pickup_centroid_location geometry(POINT, 4326), dropoff_centroid_location geometry(POINT, 4326));
-
-sudo apt-get install python-dev
-
-sudo apt install virtualenv
-
-virtualenv rideshare_env
-
-source rideshare_env/bin/activate
-
-pip install psycopg2
-
-RUN THE PYTHON IMPORT SCRIPT
-
-sudo apt install gdal-bin
-
-wget -O censustracts.geojson "https://data.cityofchicago.org/api/geospatial/5jrd-6zik?method=export&format=GeoJSON"
-
-ogr2ogr -f "PostgreSQL" PG:"dbname=rideshare user=rideshare password=rideshare host=localhost port=5433" censustracts.geojson
-
-
-psql --dbname=rideshare --host=localhost --port=5433 --username=rideshare 
-
-\d
-
-\d ogrgeojson
-
-select * from  ogrgeojson limit 1;
-
-select geoid10 from ogrgeojson limit 1;
-   geoid10   
--------------
- 17031842400
- 
- select * from trip where dropoff_census_tract = 17031842400;
-
-lets make a new table....
-
-select ST_geometrytype(wkb_geometry) from ogrgeojson;
-
-create table census_tract (census_tract_id bigint unique, tract_name varchar(50), tract_geometry geometry(multipolygon, 4326));
-
-insert into census_tract select cast(geoid10 as bigint), name10, wkb_geometry from ogrgeojson;
-
-select count(\*) from census_tract;
-
-select count(distinct dropoff_census_tract) from trip;
-
-rideshare=> select distinct dropoff_census_tract, dropoff_centroid_location
-rideshare-> from trip t
-rideshare-> left join census_tract c
-rideshare->  on c.census_tract_id = t.dropoff_census_tract
-rideshare-> where c.census_tract_id is null;
-
-select dropoff_census_tract, tract_geometry, avg(tip/t.fare) from trip t join census_tract c on c.census_tract_id=t.dropoff_census_tract where t.fare != 0 group by dropoff_census_tract, tract_geometry;
-
-NOOO out of space. move the db
-
-https://www.digitalocean.com/community/tutorials/how-to-move-a-postgresql-data-directory-to-a-new-location-on-ubuntu-16-04
-
-sudo su postgres
-/usr/lib/postgresql/11/bin/pg_ctl stop -D /etc/postgresql/11/main
-
-exit (be root)
-sudo rsync -av /var/lib/postgresql /mnt/volume-nyc1-01
-
-sudo mv /var/lib/postgresql/11/main /var/lib/postgresql/11/main.bak
-
-sudo vim /etc/postgresql/11/main/postgresql.conf
-set:
-data_directory = '/mnt/volume-nyc1-01/postgresql/11/main'
-
-/usr/lib/postgresql/11/bin/pg_ctl start -D /etc/postgresql/11/main
-
-SHOW data_directory;
-
-woo we moved the db
-
-select dropoff_census_tract, tract_geometry, avg(tip/t.fare) from trip t join census_tract c on c.census_tract_id=t.dropoff_census_tract where t.fare != 0 group by dropoff_census_tract, tract_geometry;
-welp that is still taking forever
+function style(feature) {
+    return {
+        fillColor: getColor(feature.properties.avg),
+        weight: 2,
+        opacity: 1,
+        color: 'white',
+        dashArray: '3',
+        fillOpacity: 0.7
+    };
+}
 
 
-create table tip_by_tract as select dropoff_census_tract, avg(tip/t.fare) from trip t where t.fare != 0 group by dropoff_census_tract;
+L.geoJSON(JSON.parse(data), {style: style}).addTo(map);
+```
+When you open up `index.html` in your browser, you should see something that looks like the below:
 
-ogr2ogr -f "GeoJSON" tip_by_census_dropoff.geojson PG:"dbname=rideshare user=rideshare password=rideshare host=localhost port=5433" -sql "select * from tip_by_tract t join census_tract c on c.census_tract_id=t.dropoff_census_tract;"
+<div>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA==" crossorigin=""/>
+	<script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js" integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg==" crossorigin=""></script>
+	<div id="map" style="height:500px;"></div>
+	<script type="text/javascript" src="/public/chicago-rideshare/tip_by_census_dropoff.js"></script>
+</div>
 
-
-
-
+Beautiful, isn't it?
