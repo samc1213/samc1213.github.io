@@ -194,7 +194,7 @@ This seems to work fine, but it's hard to look at in `psql`. Let's get it out in
 ogr2ogr -f "GeoJSON" tip_by_census_dropoff.geojson PG:"dbname=rideshare user=rideshare password=rideshare host=localhost port=5432" -sql "SELECT * FROM tip_by_tract t JOIN census_tract c ON c.census_tract_id=t.dropoff_census_tract;"
 ```
 
-That will write the results of the query to a file called `tip_by_census_dropoff.geojson`. All we need to do is map this file. Type `pwd` to see what directory you've been working in this whole time. I've been in `/root`. We can open up a new terminal window, and run `scp root@206.189.194.182:/root/censustracts.geojson .`. You'll want to sub in the IP address of your Digital Ocean server for mine. This will copy the geojson file to your local machine. Then, create a file called `index.html` in the same directory as the geojson file on your local machine. It should look something like this
+That will write the results of the query to a file called `tip_by_census_dropoff.geojson`. All we need to do is map this file. Type `pwd` to see what directory you've been working in this whole time. I've been in `/root`. We can open up a new terminal window on our local machine, and run `scp root@206.189.194.182:/root/tip_by_census_dropoff.geojson .`. You'll want to sub in the IP address of your Digital Ocean server for mine. This will copy the geojson file to your local machine. Then, create a file called `index.html` in the same directory as the geojson file on your local machine. It should look something like this
 
 ```html
  <head>
@@ -255,4 +255,4 @@ When you open up `index.html` in your browser, you should see something that loo
 	<script type="text/javascript" src="/public/chicago-rideshare/tip_by_census_dropoff.js"></script>
 </div>
 
-Beautiful, isn't it?
+Beautiful, isn't it? If this didn't work for you, check out my small Github [repo](https://github.com/samc1213/chicago-rideshare) that contains the demo.
