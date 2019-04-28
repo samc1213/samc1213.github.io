@@ -306,3 +306,7 @@ When you open up `index.html` in your browser, you should see something that loo
 </div>
 
 Beautiful, isn't it? If this didn't work for you, check out my small Github [repo](https://github.com/samc1213/chicago-rideshare) that contains the demo.
+
+## Next Steps
+I'm honestly not that satisfied with these results from an analytical perspective. If you have any ideas of things to look at in the dataset, please leave a comment below. With this framework set up, it should be much easier to do additional analysis.
+
