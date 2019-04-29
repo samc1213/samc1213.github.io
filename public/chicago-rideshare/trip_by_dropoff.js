@@ -1,17 +1,17 @@
-var map = L.map('pickup').setView([41.881832, -87.623177], 12);
+var map = L.map('dropoff').setView([41.881832, -87.623177], 12);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 }).addTo(map);
 
 function getColor(d) {
-    return d > .07 ? '#800026' :
-           d > .06 ? '#BD0026' :
-           d > .05 ? '#E31A1C' :
-           d > .04 ? '#FC4E2A' :
-           d > .03 ? '#FD8D3C' :
-           d > .02 ? '#FEB24C' :
-           d > .01 ? '#FED976' :
+    return d > 700 ? '#800026' :
+           d > 600 ? '#BD0026' :
+           d > 500 ? '#E31A1C' :
+           d > 400 ? '#FC4E2A' :
+           d > 300 ? '#FD8D3C' :
+           d > 200 ? '#FEB24C' :
+           d > 100 ? '#FED976' :
                      '#FFEDA0';
 }
 
@@ -41,28 +41,6 @@ info.update = function (props) {
 };
 
 info.addTo(map);
-
-function getColor(d) {
-    return d > 700 ? '#800026' :
-           d > 600 ? '#BD0026' :
-           d > 500 ? '#E31A1C' :
-           d > 400 ? '#FC4E2A' :
-           d > 300 ? '#FD8D3C' :
-           d > 200 ? '#FEB24C' :
-           d > 100 ? '#FED976' :
-                     '#FFEDA0';
-}
-
-function style(feature) {
-    return {
-        fillColor: getColor(feature.properties.avg),
-        weight: 2,
-        opacity: 1,
-        color: 'white',
-        dashArray: '3',
-        fillOpacity: 0.7
-    };
-}
 
 var geojson;
 
@@ -115,7 +93,7 @@ legend.onAdd = function (map) {
 
 legend.addTo(map);
 
-var url = 'https://raw.githubusercontent.com/samc1213/chicago-rideshare/master/trip_by_pickup.geojson';
+var url = 'https://raw.githubusercontent.com/samc1213/chicago-rideshare/master/trip_by_dropoff.geojson';
 fetch(url).then(r => {
 	return r.json();
 }).then(data => {
