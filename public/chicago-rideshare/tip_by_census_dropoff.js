@@ -36,7 +36,7 @@ info.onAdd = function (map) {
 
 info.update = function (props) {
   this._div.innerHTML =  (props ?
-    '<h3>tip / trip length (miles)</h3><b>$' + props.avg + ' </b><br>Tract ' + props.tract_name
+    '<h3>tip per mile travelled</h3><b>$' + props.avg + ' </b><br>Tract ' + props.tract_name
     : 'Hover over a census tract');
 };
 
@@ -96,6 +96,24 @@ function onEachFeature(feature, layer) {
     });
 }
 
+var legend = L.control({position: 'bottomright'});
+
+legend.onAdd = function (map) {
+
+    var div = L.DomUtil.create('div', 'info legend'),
+        grades = [0, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07],
+        labels = [];
+
+    for (var i = 0; i < grades.length; i++) {
+        div.innerHTML +=
+            '<i style="background:' + getColor(grades[i]) + '"></i> $' +
+            grades[i] + (grades[i + 1] ? '&ndash;$' + grades[i + 1] + '<br>' : '+');
+    }
+
+    return div;
+};
+
+legend.addTo(map);
 
 let url = 'https://raw.githubusercontent.com/samc1213/chicago-rideshare/master/tip_by_census_dropoff.geojson';
 fetch(url).then(r => {

@@ -11,6 +11,8 @@ I was recently reading Steve Vance and John Greenfield's [article](https://chi.s
 
 My first idea was to look at how much people tip based on where they're dropped off:
 
+### Tip per mile traveled, by dropoff location:
+
 <div>
 	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA==" crossorigin=""/>
 	<script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js" integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg==" crossorigin=""></script>
@@ -309,14 +311,7 @@ geojson = L.geoJson(JSON.parse(data), {
     onEachFeature: onEachFeature
 }).addTo(map);
 ```
-When you open up `index.html` in your browser, you should see something that looks like the below:
-
-<div>
-	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA==" crossorigin=""/>
-	<script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js" integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg==" crossorigin=""></script>
-	<div id="map" style="height:500px;"></div>
-	<script type="text/javascript" src="/public/chicago-rideshare/tip_by_census_dropoff.js"></script>
-</div>
+When you open up `index.html` in your browser, you should see something that looks like the maps at the beginning the post.
 
 Beautiful, isn't it? If this didn't work for you, check out my small Github [repo](https://github.com/samc1213/chicago-rideshare) that contains the demo.
 
