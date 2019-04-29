@@ -1,4 +1,4 @@
-var map = L.map('map').setView([41.881832, -87.623177], 12);
+var map = L.map('pickup').setView([41.881832, -87.623177], 12);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -36,20 +36,20 @@ info.onAdd = function (map) {
 
 info.update = function (props) {
   this._div.innerHTML =  (props ?
-    '<h3>tip per mile traveled</h3><b>$' + props.avg + ' </b><br>Tract ' + props.tract_name
+    '<h3>total trips by pickup location</h3><b>$' + props.avg + ' </b><br>Tract ' + props.tract_name
     : 'Hover over a census tract');
 };
 
 info.addTo(map);
 
 function getColor(d) {
-    return d > .07 ? '#800026' :
-           d > .06 ? '#BD0026' :
-           d > .05 ? '#E31A1C' :
-           d > .04 ? '#FC4E2A' :
-           d > .03 ? '#FD8D3C' :
-           d > .02 ? '#FEB24C' :
-           d > .01 ? '#FED976' :
+    return d > 700 ? '#800026' :
+           d > 600 ? '#BD0026' :
+           d > 500 ? '#E31A1C' :
+           d > 400 ? '#FC4E2A' :
+           d > 300 ? '#FD8D3C' :
+           d > 200 ? '#FEB24C' :
+           d > 100 ? '#FED976' :
                      '#FFEDA0';
 }
 
@@ -115,7 +115,7 @@ legend.onAdd = function (map) {
 
 legend.addTo(map);
 
-let url = 'https://raw.githubusercontent.com/samc1213/chicago-rideshare/master/tip_by_census_dropoff.geojson';
+let url = 'https://raw.githubusercontent.com/samc1213/chicago-rideshare/master/trip_by_pickup.geojson';
 fetch(url).then(r => {
 	return r.json();
 }).then(data => {
