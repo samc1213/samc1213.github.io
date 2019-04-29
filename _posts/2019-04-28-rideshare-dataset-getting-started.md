@@ -5,7 +5,19 @@ preview: How to get started with mapping GIS data
 ---
 
 # Introduction
-I was recently reading Steve Vance and John Greenfield's [article](https://chi.streetsblog.org/2019/04/18/the-most-common-chicago-ride-hailing-trip-is-a-1-mile-hop-from-river-north-to-loop/){:target="_blank"} summarizing data from the City of Chicago's publishing of anonymized [ride hailing data](https://data.cityofchicago.org/Transportation/Transportation-Network-Providers-Trips/m6dm-c72p){:target="_blank"}. I figured I would play around with the data, to at least learn some new skills, and at most find something interesting in the dataset. I also wanted to share with others how I went about the technical aspects of my exploration. So here we go...
+I was recently reading Steve Vance and John Greenfield's [article](https://chi.streetsblog.org/2019/04/18/the-most-common-chicago-ride-hailing-trip-is-a-1-mile-hop-from-river-north-to-loop/){:target="_blank"} summarizing data from the City of Chicago's publishing of anonymized [ride hailing data](https://data.cityofchicago.org/Transportation/Transportation-Network-Providers-Trips/m6dm-c72p){:target="_blank"}. I figured I would play around with the data, to at least learn some new skills, and at most find something interesting in the dataset. I also wanted to share with others how I went about the technical aspects of my exploration.
+
+# Results
+
+My first idea was to look at how much people tip based on where they're dropped off:
+
+<div>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA==" crossorigin=""/>
+	<script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js" integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg==" crossorigin=""></script>
+	<div id="map" style="height:500px;"></div>
+	<script type="text/javascript" src="/public/chicago-rideshare/tip_by_census_dropoff.js"></script>
+</div>
+
 
 # The plan
 I did some research, and found that [PostGIS](https://postgis.net){:target="_blank"} is a very popular, open-source Postgres extension for dealing with GIS data. [Postgres](https://www.postgresql.org/){:target="_blank"} is a relational SQL database, but doesn't have any GIS capabilities out of the box. I've used Postgres before. Postgres could help us answer questions like "Which census tract paid the most in tips?". I also want to use [Leaflet](https://leafletjs.com/){:target="_blank"}, a JavaScript library that is used for map visualizations, in order to visualize some of our findings.
