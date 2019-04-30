@@ -26,6 +26,8 @@ There are 17 million+ trips reported.
 I figured I would play around with the data, to at least learn some new skills, and at most find something interesting in the dataset. I also wanted to share with others how I went about the technical aspects of my exploration.
 
 # Results
+_Disclaimer: For many of the trips, the pickup and/or dropoff census tract is omitted from the dataset. This is either due to the trip starting/ending outside of the city, or the city electing to anonymize that trip due to privacy concerns (some census tracts are very small and you might be able to identify an individual person from the public data). I ignored trips without a census tract, which skews the results below. There are potentially other data cleaning issues - this post is intended to be more educational on how to produce these maps, as opposed to finding anything particularly interesting in the data_
+
 My first idea was to simply look at the raw number of trips, by pickup location:
 
 ### Number of trips by pickup location:
