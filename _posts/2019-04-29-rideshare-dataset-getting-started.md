@@ -10,7 +10,7 @@ preview: How to get started with mapping GIS data
 </head>
 
 # Introduction
-I was recently reading Steve Vance and John Greenfield's [article](https://chi.streetsblog.org/2019/04/18/the-most-common-chicago-ride-hailing-trip-is-a-1-mile-hop-from-river-north-to-loop/){:target="_blank"} summarizing data from the City of Chicago's publishing of anonymized [ride hailing data](https://data.cityofchicago.org/Transportation/Transportation-Network-Providers-Trips/m6dm-c72p){:target="_blank"}. The data shows all trips on Uber, Lyft, and Via from 11/1/2018 through 12/31/2018, starting and/or ending in the City of Chicago. The data includes the below for each rideshare trip:
+I was recently reading Steve Vance and John Greenfield's [article](https://chi.streetsblog.org/2019/04/18/the-most-common-chicago-ride-hailing-trip-is-a-1-mile-hop-from-river-north-to-loop/){:target="_blank"} summarizing data from the City of Chicago's publishing of anonymized [ride hailing data](https://data.cityofchicago.org/Transportation/Transportation-Network-Providers-Trips/m6dm-c72p){:target="_blank"}, and decided to look into the dataset on my own. The data shows all trips on Uber, Lyft, and Via from 11/1/2018 through 12/31/2018, starting and/or ending in the City of Chicago. The data includes the below for each rideshare trip:
 
 - Pickup census tract
 - Dropoff census tract
