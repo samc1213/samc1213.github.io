@@ -10,10 +10,22 @@ preview: How to get started with mapping GIS data
 </head>
 
 # Introduction
-I was recently reading Steve Vance and John Greenfield's [article](https://chi.streetsblog.org/2019/04/18/the-most-common-chicago-ride-hailing-trip-is-a-1-mile-hop-from-river-north-to-loop/){:target="_blank"} summarizing data from the City of Chicago's publishing of anonymized [ride hailing data](https://data.cityofchicago.org/Transportation/Transportation-Network-Providers-Trips/m6dm-c72p){:target="_blank"}. I figured I would play around with the data, to at least learn some new skills, and at most find something interesting in the dataset. I also wanted to share with others how I went about the technical aspects of my exploration.
+I was recently reading Steve Vance and John Greenfield's [article](https://chi.streetsblog.org/2019/04/18/the-most-common-chicago-ride-hailing-trip-is-a-1-mile-hop-from-river-north-to-loop/){:target="_blank"} summarizing data from the City of Chicago's publishing of anonymized [ride hailing data](https://data.cityofchicago.org/Transportation/Transportation-Network-Providers-Trips/m6dm-c72p){:target="_blank"}. The data shows all trips on Uber, Lyft, and Via from 11/1/2018 through 12/31/2018, starting and/or ending in the City of Chicago. The data includes the below for each rideshare trip:
+
+- Pickup census tract
+- Dropoff census tract
+- Total trip time elapsed
+- Trip distance
+- Fare paid
+- Tip paid
+- Whether the trip was a "shared" ride (e.g., UberPool)
+- Trip start and end time, rounded to the nearest 15 minutes
+
+There are 17 million+ trips reported.
+
+I figured I would play around with the data, to at least learn some new skills, and at most find something interesting in the dataset. I also wanted to share with others how I went about the technical aspects of my exploration.
 
 # Results
-
 My first idea was to simply look at the raw number of trips, by pickup location:
 
 ### Number of trips by pickup location:
@@ -41,6 +53,7 @@ Next, I figured it would be fun to see where people are tipping more per mile. I
 	<div id="tip" style="height:500px;"></div>
 	<script type="text/javascript" src="/public/chicago-rideshare/tip_by_census_dropoff.js"></script>
 </div>
+
 
 While I think there's a lot more I can do with the dataset, I've spent a lot of time on this post so I'm going to stop here for now. My main motivation was to learn how to play with GIS data and visualize it on the web, and I think I accomplished that. I hope someone else can learn something from the very detailed walkthrough below.
 
