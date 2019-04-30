@@ -1,23 +1,26 @@
-var map = L.map('map').setView([41.881832, -87.623177], 12);
+var tipMap = L.map('tip').setView([41.881832, -87.623177], 12);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-}).addTo(map);
+}).addTo(tipMap);
 
-function getColor(d) {
-    return d > .07 ? '#800026' :
-           d > .06 ? '#BD0026' :
-           d > .05 ? '#E31A1C' :
-           d > .04 ? '#FC4E2A' :
-           d > .03 ? '#FD8D3C' :
-           d > .02 ? '#FEB24C' :
-           d > .01 ? '#FED976' :
-                     '#FFEDA0';
+var tipRanges= [0, .01, .02, .03, .04, .05, .06, .07];
+
+
+function getTipColor(d) {
+    return d > tipRanges[7] ? '#800026' :
+           d > tipRanges[6] ? '#BD0026' :
+           d > tipRanges[5] ? '#E31A1C' :
+           d > tipRanges[4] ? '#FC4E2A' :
+           d > tipRanges[3] ? '#FD8D3C' :
+           d > tipRanges[2] ? '#FEB24C' :
+           d > tipRanges[1] ? '#FED976' :
+                                  '#FFEDA0';
 }
 
-function style(feature) {
+function tipStyle(feature) {
     return {
-        fillColor: getColor(feature.properties.avg),
+        fillColor: getTipColor(feature.properties.avg),
         weight: 2,
         opacity: 1,
         color: 'white',
@@ -26,25 +29,25 @@ function style(feature) {
     };
 }
 
-var info = L.control();
+var tipInfo = L.control();
 
-info.onAdd = function (map) {
-  this._div = L.DomUtil.create('div', 'info');
+tipInfo.onAdd = function (map) {
+  this._div = L.DomUtil.create('div', 'tipInfo');
   this.update();
   return this._div;
 };
 
-info.update = function (props) {
+tipInfo.update = function (props) {
   this._div.innerHTML =  (props ?
-    '<h3>tip per mile traveled</h3><b>$' + props.avg + ' </b><br>Tract ' + props.tract_name
-    : 'Hover over a census tract');
+      '<div class="map-container"><div class="map-title">Average Tip Per Distance Traveled ($/mile)</div><div class="map-value">$' + props.avg + '/mi </div><div class="map-subvalue">Tract ' + props.tract_name + '</div>'
+    : '<div class="map-container"><div class="map-title">Average Tip Per Distance Traveled ($/mile)</div><div class="map-subvalue">Hover over a census tract</div></div>');
 };
 
-info.addTo(map);
+tipInfo.addTo(tipMap);
 
-var geojson;
+var tipGeoJson;
 
-function highlightFeature(e) {
+function highlightTipFeature(e) {
     var layer = e.target;
 
     layer.setStyle({
@@ -58,46 +61,43 @@ function highlightFeature(e) {
         layer.bringToFront();
     }
 
-    info.update(layer.feature.properties);
+    tipInfo.update(layer.feature.properties);
 }
 
-function resetHighlight(e) {
-    geojson.resetStyle(e.target);
-    info.update();
+function resetTipHighlight(e) {
+    tipGeoJson.resetStyle(e.target);
+    tipInfo.update();
 }
 
-function onEachFeature(feature, layer) {
+function onEachTipFeature(feature, layer) {
     layer.on({
-        mouseover: highlightFeature,
-        mouseout: resetHighlight,
-        click: highlightFeature
+        mouseover: highlightTipFeature,
+        mouseout: resetTipHighlight,
+        click: highlightTipFeature
     });
 }
 
-var legend = L.control({position: 'bottomright'});
+var tipLegend = L.control({position: 'bottomright'});
 
-legend.onAdd = function (map) {
+tipLegend.onAdd = function (map) {
 
-    var div = L.DomUtil.create('div', 'info legend'),
-        grades = [0, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07],
-        labels = [];
-
-    for (var i = 0; i < grades.length; i++) {
+    var div = L.DomUtil.create('div', 'tipInfo legend');
+    for (var i = 0; i < tipRanges.length; i++) {
         div.innerHTML +=
-            '<i style="background:' + getColor(grades[i]) + '"></i> $' +
-            grades[i] + (grades[i + 1] ? '&ndash;$' + grades[i + 1] + '<br>' : '+');
+            '<i style="background:' + getTipColor(tipRanges[i] + .001) + '"></i> $' +
+            tipRanges[i] + (tipRanges[i + 1] ? '&ndash;$' + tipRanges[i + 1] + '<br>' : '+');
     }
 
     return div;
 };
 
-legend.addTo(map);
+tipLegend.addTo(tipMap);
 
 var url = 'https://raw.githubusercontent.com/samc1213/chicago-rideshare/master/tip_by_census_dropoff.geojson';
 fetch(url).then(r => {
 	return r.json();
 }).then(data => {
-	geojson = L.geoJSON(data, {style: style, onEachFeature: onEachFeature}).addTo(map);
+	tipGeoJson = L.geoJSON(data, {style: tipStyle, onEachFeature: onEachTipFeature}).addTo(tipMap);
 });
 
 

@@ -4,6 +4,11 @@ title: Chicago Open Rideshare Dataset - Getting Started
 preview: How to get started with mapping GIS data
 ---
 
+<head>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA==" crossorigin=""/>
+	<script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js" integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg==" crossorigin=""></script>
+</head>
+
 # Introduction
 I was recently reading Steve Vance and John Greenfield's [article](https://chi.streetsblog.org/2019/04/18/the-most-common-chicago-ride-hailing-trip-is-a-1-mile-hop-from-river-north-to-loop/){:target="_blank"} summarizing data from the City of Chicago's publishing of anonymized [ride hailing data](https://data.cityofchicago.org/Transportation/Transportation-Network-Providers-Trips/m6dm-c72p){:target="_blank"}. I figured I would play around with the data, to at least learn some new skills, and at most find something interesting in the dataset. I also wanted to share with others how I went about the technical aspects of my exploration.
 
@@ -14,46 +19,46 @@ My first idea was to simply look at the raw number of trips, by pickup location:
 ### Number of trips by pickup location:
 
 <div>
-	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA==" crossorigin=""/>
-	<script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js" integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg==" crossorigin=""></script>
 	<div id="pickup" style="height:500px;"></div>
 	<script type="text/javascript" src="/public/chicago-rideshare/trip_by_pickup.js"></script>
 </div>
 
+Take a look at the logarithmic scale in the legend. It's hard to pick a proper color gradient for a map... But some of the numbers are much lower than I expected. Keep in mind the dataset includes all trips on Uber, Lyft, and Via from 11/1/2018 through 12/31/2018.
+
 ### Number of trips by dropoff location:
 
 <div>
-	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA==" crossorigin=""/>
-	<script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js" integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg==" crossorigin=""></script>
 	<div id="dropoff" style="height:500px;"></div>
 	<script type="text/javascript" src="/public/chicago-rideshare/trip_by_dropoff.js"></script>
 </div>
+This seems basically the same as the pickup map.
 
+Next, I figured it would be fun to see where people are tipping more per mile. I figured tip per mile traveled is a good proxy for "cheapness", although maybe dividing by the median household income of each dropoff tract would be even more interesting.
 
 ### Tip per mile traveled, by dropoff location:
 
 <div>
-	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA==" crossorigin=""/>
-	<script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js" integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg==" crossorigin=""></script>
-	<div id="map" style="height:500px;"></div>
+	<div id="tip" style="height:500px;"></div>
 	<script type="text/javascript" src="/public/chicago-rideshare/tip_by_census_dropoff.js"></script>
 </div>
 
+While I think there's a lot more I can do with the dataset, I've spent a lot of time on this post so I'm going to stop here for now. My main motivation was to learn how to play with GIS data and visualize it on the web, and I think I accomplished that. I hope someone else can learn something from the very detailed walkthrough below.
 
-# The plan
-I did some research, and found that [PostGIS](https://postgis.net){:target="_blank"} is a very popular, open-source Postgres extension for dealing with GIS data. [Postgres](https://www.postgresql.org/){:target="_blank"} is a relational SQL database, but doesn't have any GIS capabilities out of the box. I've used Postgres before. Postgres could help us answer questions like "Which census tract paid the most in tips?". I also want to use [Leaflet](https://leafletjs.com/){:target="_blank"}, a JavaScript library that is used for map visualizations, in order to visualize some of our findings.
+# How Did I Do This?
+I did some research, and found that [PostGIS](https://postgis.net){:target="_blank"} is a very popular, open-source Postgres extension for dealing with GIS data. [Postgres](https://www.postgresql.org/){:target="_blank"} is a relational SQL database, but doesn't have any GIS capabilities out of the box. I had used Postgres before. Postgres can help us answer questions like "Which census tract paid the most in tips?". I also wanted to use [Leaflet](https://leafletjs.com/){:target="_blank"}, a JavaScript library that is used for map visualizations, in order to visualize some of our findings.
 
-So, the plan looks something like this:
+So, the plan looked something like this:
 - Set up Postgres database with PostGIS extension
 - Import all 17 million trips into the database
 - Query the dataset for some interesting finding
 - Map the finding using Leaflet, so we can see our results in a pretty webpage
 
-If this means nothing to you, then great! I'll provide plently of detail. If it's too much detail, don't worry, hopefully I'll have more interesting findings in future posts.
+If this means nothing to you, then great! I'll provide plently of detail below. If it's too much detail, don't worry, hopefully I'll have more interesting findings in future posts.
 
 This post should hopefully be comprehensible by people with minimal computer experience.
 
-# Lets do it
+# The Details
+_A wise man once told me, "the devil is in the details"_
 ## Digital Ocean
 It will probably be easiest if you use the exact same setup as me, so I think it's best that you get a "droplet" set up on [Digital Ocean](https://m.do.co/c/d1af2197f842){:target="_blank"}. A droplet is just a virtual machine (basically a server) that you can get in the "cloud". Oooooh. Heard of the cloud before? It's a beautiful, white, fluffy place. Once you create an account, you will be able to get a server with lots of resources (don't worry, we'll use one with very few resources) in a matter of seconds. I like Digital Ocean for its simple interface and simple pricing. With [AWS](https://aws.amazon.com){:target="_blank"} I often struggle to understand how much I'll be paying. Using a server will be nice to make sure we don't ruin our own personal machines, and also to have enough hard disk space (the dataset is big). Also, the $5 monthly fee is pro-rated, so if you finish this demo in a few hours, you'll be paying pennies.
 

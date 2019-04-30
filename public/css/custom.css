@@ -9,3 +9,16 @@
     margin-right: 8px;
     opacity: 0.7;
 }
+.map-container {
+	text-align: right;
+}
+.map-title {
+	font-weight: bold;
+	font-size: 2em;
+}
+.map-value {
+	font-size: 2em;
+}
+.map-subvalue {
+	font-size: 1em;
+}

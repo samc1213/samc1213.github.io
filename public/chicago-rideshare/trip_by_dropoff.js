@@ -1,23 +1,39 @@
-var map = L.map('dropoff').setView([41.881832, -87.623177], 12);
+var dropoffMap = L.map('dropoff').setView([41.881832, -87.623177], 12);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-}).addTo(map);
+}).addTo(dropoffMap);
 
-function getColor(d) {
-    return d > 700 ? '#800026' :
-           d > 600 ? '#BD0026' :
-           d > 500 ? '#E31A1C' :
-           d > 400 ? '#FC4E2A' :
-           d > 300 ? '#FD8D3C' :
-           d > 200 ? '#FEB24C' :
-           d > 100 ? '#FED976' :
-                     '#FFEDA0';
+var dropoffInfo = L.control();
+
+dropoffInfo.onAdd = function (dropoffMap) {
+  this._div = L.DomUtil.create('div', 'dropoffInfo');
+  this.update();
+  return this._div;
+};
+
+dropoffInfo.update = function (props) {
+  this._div.innerHTML =  (props ?
+    '<div class="map-container"><div class="map-title">Total Trips By Dropoff Location</div><div class="map-value">' + props.count.toLocaleString() + ' Trips </div><div class="map-subvalue">Tract ' + props.tract_name + '</div>'
+    : '<div class="map-container"><div class="map-title">Total Trips By Dropoff Location</div><div class="map-subvalue">Hover over a census tract</div></div>');
+};
+
+dropoffInfo.addTo(dropoffMap);
+
+var dropoffRanges = [0, 10, 100, 1000, 10000, 100000];
+
+function getDropoffColor(d) {
+    return d > dropoffRanges[5] ? '#E31A1C' :
+           d > dropoffRanges[4] ? '#FC4E2A' :
+           d > dropoffRanges[3] ? '#FD8D3C' :
+           d > dropoffRanges[2] ? '#FEB24C' :
+           d > dropoffRanges[1] ? '#FED976' :
+                                 '#FFEDA0';
 }
 
-function style(feature) {
+function dropoffStyle(feature) {
     return {
-        fillColor: getColor(feature.properties.avg),
+        fillColor: getDropoffColor(feature.properties.count),
         weight: 2,
         opacity: 1,
         color: 'white',
@@ -26,25 +42,9 @@ function style(feature) {
     };
 }
 
-var info = L.control();
+var dropoffGeoJson;
 
-info.onAdd = function (map) {
-  this._div = L.DomUtil.create('div', 'info');
-  this.update();
-  return this._div;
-};
-
-info.update = function (props) {
-  this._div.innerHTML =  (props ?
-    '<h3>total trips by pickup location</h3><b>$' + props.avg + ' </b><br>Tract ' + props.tract_name
-    : 'Hover over a census tract');
-};
-
-info.addTo(map);
-
-var geojson;
-
-function highlightFeature(e) {
+function highlightDropoffFeature(e) {
     var layer = e.target;
 
     layer.setStyle({
@@ -58,46 +58,42 @@ function highlightFeature(e) {
         layer.bringToFront();
     }
 
-    info.update(layer.feature.properties);
+    dropoffInfo.update(layer.feature.properties);
 }
 
-function resetHighlight(e) {
-    geojson.resetStyle(e.target);
-    info.update();
+function resetDropoffHighlight(e) {
+    dropoffGeoJson.resetStyle(e.target);
+    dropoffInfo.update();
 }
 
-function onEachFeature(feature, layer) {
+function onEachDropoffFeature(feature, layer) {
     layer.on({
-        mouseover: highlightFeature,
-        mouseout: resetHighlight,
-        click: highlightFeature
+        mouseover: highlightDropoffFeature,
+        mouseout: resetDropoffHighlight,
+        click: highlightDropoffFeature
     });
 }
 
-var legend = L.control({position: 'bottomright'});
+var dropoffLegend = L.control({position: 'bottomright'});
 
-legend.onAdd = function (map) {
-
-    var div = L.DomUtil.create('div', 'info legend'),
-        grades = [0, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07],
-        labels = [];
-
-    for (var i = 0; i < grades.length; i++) {
+dropoffLegend.onAdd = function (map) {
+    var div = L.DomUtil.create('div', 'dropoffInfo legend');
+    for (var i = 0; i < pickupRanges.length; i++) {
         div.innerHTML +=
-            '<i style="background:' + getColor(grades[i]) + '"></i> $' +
-            grades[i] + (grades[i + 1] ? '&ndash;$' + grades[i + 1] + '<br>' : '+');
+            '<i style="background:' + getDropoffColor(dropoffRanges[i] + 1) + '"></i>' +
+            dropoffRanges[i].toLocaleString() + (dropoffRanges[i + 1] ? '&ndash;' + dropoffRanges[i + 1].toLocaleString() + '<br>' : '+');
     }
 
     return div;
 };
 
-legend.addTo(map);
+dropoffLegend.addTo(dropoffMap);
 
 var url = 'https://raw.githubusercontent.com/samc1213/chicago-rideshare/master/trip_by_dropoff.geojson';
 fetch(url).then(r => {
-	return r.json();
+  return r.json();
 }).then(data => {
-	geojson = L.geoJSON(data, {style: style, onEachFeature: onEachFeature}).addTo(map);
+  dropoffGeoJson = L.geoJSON(data, {style: dropoffStyle, onEachFeature: onEachDropoffFeature}).addTo(dropoffMap);
 });
 
 
