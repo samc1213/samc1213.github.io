@@ -2,7 +2,6 @@
 layout: post
 title: Thinking, Fast and Slow - A summary
 preview: In case you don't want to read all 500 pages...
-tags: [book-summary]
 ---
 
 # Background
