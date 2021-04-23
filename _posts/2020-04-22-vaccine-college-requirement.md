@@ -24,5 +24,5 @@ the list, please go [here](https://github.com/samc1213/college-vacc).
 <div>
 	<div id="map" style="height:500px;"></div>
     <table id="table" style="margin-top:15px;"></table>
-	<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/samc1213/college-vacc@f73eb78e08d917b8a4790169b7fa852be7853e84/js/campus-vacc-main.js"></script>
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/samc1213/college-vacc@08d25af3ff5ad1af4ec8a50267bc8d564d0e0b34/js/campus-vacc-main.js"></script>
 </div>
