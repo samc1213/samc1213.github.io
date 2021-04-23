@@ -14,11 +14,12 @@ preview: An attempt to create a comprehensive list
 </head>
 
 
-<div>
-	<div id="map" style="height:500px;"></div>
-	<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/samc1213/college-vacc@c5104e12b8b68c12a4fc7d5eedf5b5c183c17330/js/campus-vacc-main.js"></script>
-</div>
-
 There is a growing list of colleges and universities throughout the U.S. requiring a COVID vaccine, but few
 organized projects attempting to maintain this list. Here's a shot at it (hehe)! If you'd like to contribute / update
 the list, please go [here](https://github.com/samc1213/college-vacc).
+
+<div>
+	<div id="map" style="height:500px;"></div>
+    <table id="table" style="margin-top:15px;"></table>
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/samc1213/college-vacc@f73eb78e08d917b8a4790169b7fa852be7853e84/js/campus-vacc-main.js"></script>
+</div>
