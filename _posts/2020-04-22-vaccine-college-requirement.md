@@ -16,7 +16,7 @@ preview: An attempt to create a comprehensive list
 
 <div>
 	<div id="map" style="height:500px;"></div>
-	<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/samc1213/college-vacc@main/js/campus-vacc-main.js"></script>
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/samc1213/college-vacc@829b35e841a7ba2808e52218230d7cfc542f6958/js/campus-vacc-main.js"></script>
     
 </div>
 
