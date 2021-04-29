@@ -36,4 +36,13 @@
 
   <!-- RSS -->
   <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+
+  {% if page.title != "Home" %}
+    <meta property="og:title" content="{{ page.title }}">
+    <meta property="og:description" content="{{ page.preview }}">
+    <meta property="og:image" content="{{ page.image }}">
+  {% endif %}
+
+
+
 </head>
