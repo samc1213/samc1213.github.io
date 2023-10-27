@@ -126,4 +126,4 @@ All of this gets to be a lot to manage! And while my OCI Block Storage Volume is
 All in all, I love hosting my own software in the cloud. It helps me take control over my own data, and I learn a lot about operating cloud software. Of course this isn't the most sophisticated setup, but it allows me to learn some new tools (Oracle Cloud, Ansible), without being too overengineered or hard to manage. Given OCI's incredible Free Tier, you might as well give it a try!
 
 # Shameless plug
-Interested in hiring me? See my resume [here](samacohen.com/resume.pdf)
+Interested in hiring me? See my resume [here](https://samacohen.com/resume.pdf)
