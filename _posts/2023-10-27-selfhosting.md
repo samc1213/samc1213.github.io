@@ -1,7 +1,7 @@
 ---
 layout: post
 title: How I Save $0 a Month Hosting Open Source Software in the Cloud
-image: /public/campus-vacc/campus-vacc-screenshot.png
+image: /public/selfhosting/setup.png
 ---
 Hosting software yourself can help you:
 
