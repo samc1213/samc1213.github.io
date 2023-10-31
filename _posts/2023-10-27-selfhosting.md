@@ -44,7 +44,7 @@ This is a crazy good deal! I used to use DigitalOcean, and I love DO's simple in
 ![setup](/public/selfhosting/setup.png)
 
 # How do I host it?
-## Docker
+## Containers - Docker
 Most self-hosted applications are easy to setup using Docker and Docker Compose. For example, here's the Docker Compose file for FreshRSS, my RSS feed aggregator:
 
 ```yaml
@@ -71,7 +71,7 @@ services:
 
 It's pretty simple! Then I run `docker compose up`, and I've got the service running on port 8281 on my VM. Also, I've mapped the folder `/blkstg/freshrss-data` to the Docker container, so that any files created by FreshRSS show up on the host VM's filesystem at that path. This `/blkstg` path is an OCI Block Storage volume that I configured using the Oracle Cloud website. It has a 150 GB capacity.
 
-## Nginx
+## Reverse Proxy - Nginx
 To expose this service to the outside world, I use Nginx as a reverse proxy. Nginx is configured for this service like this:
 
 ```nginx
@@ -119,8 +119,8 @@ Backups are critical! I've got a pretty killer backup script [here](https://gith
 ## Error Notifications - systemd and email
 I have a simple systemd service to notify me of errors over email. You can check it out [here](https://github.com/samc1213/selfhosted/blob/master/files/error-notify%40.service.j2). Right now I just notify on errors with my backup process.
 
-## Command and Control - Ansible
-All of this gets to be a lot to manage! And while my OCI Block Storage Volume is backed up, the actual operating system volume is not backed up from my VM. So if it were to die, I'd lose all the Nginx configurations, Docker Compose files, etc. I recently started using [Ansible](https://www.ansible.com/) for command and control. Ansible runs on my personal laptop, and uses SSH to connect to my OCI VM. I love the Ansible Vault feature, which allows me to commit secrets to my Ansible [repo](https://github.com/samc1213/selfhosted/), and encrypts them. Then, when running an Ansible Playbook, I can provide a password to decrypt the secrets and drop them on my VM. Ansible allows me to see everything that I'm running on my self-hosted setup in one place.
+## Configuration/Automation/Management - Ansible
+All of this gets to be a lot to manage! And while my OCI Block Storage Volume is backed up, the actual operating system volume is not backed up from my VM. So if it were to die, I'd lose all the Nginx configurations, Docker Compose files, etc. I recently started using [Ansible](https://www.ansible.com/) to manage all of this. Ansible runs on my personal laptop, and uses SSH to connect to my OCI VM. I love the Ansible Vault feature, which allows me to commit secrets to my Ansible [repo](https://github.com/samc1213/selfhosted/), and encrypts them. Then, when running an Ansible Playbook, I can provide a password to decrypt the secrets and drop them on my VM. Ansible allows me to see everything that I'm running on my self-hosted setup in one place.
 
 # Conclusion
 All in all, I love hosting my own software in the cloud. It helps me take control over my own data, and I learn a lot about operating cloud software. Of course this isn't the most sophisticated setup, but it allows me to learn some new tools (Oracle Cloud, Ansible), without being too overengineered or hard to manage. Given OCI's incredible Free Tier, you might as well give it a try!
